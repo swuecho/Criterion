@@ -230,12 +230,22 @@ jobs:
           mkdir -p artifacts/criterion-fil/opt/criterion-fil/include
           mkdir -p artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig
 
+          boxfort_lib="$(find build -type f -name 'libboxfort*.a' | head -n1)"
+          libgit2_lib="$(find build -type f -name 'libgit2*.a' | head -n1)"
+          nanomsg_lib="$(find build -type f -name 'libnanomsg*.a' | head -n1)"
+          nanopb_lib="$(find build -type f \\( -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' \\) | head -n1)"
+
+          test -n "$boxfort_lib"
+          test -n "$libgit2_lib"
+          test -n "$nanomsg_lib"
+          test -n "$nanopb_lib"
+
           cp -R include/criterion artifacts/criterion-fil/opt/criterion-fil/include/
           cp build/src/libcriterion.a artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp build/subprojects/boxfort/src/libboxfort.a artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp build/subprojects/libgit2/libgit2.a artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp build/subprojects/nanomsg/libnanomsg.a artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp build/subprojects/nanopb/libprotobuf-nanopb-static.a artifacts/criterion-fil/opt/criterion-fil/lib/
+          cp "$boxfort_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+          cp "$libgit2_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+          cp "$nanomsg_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+          cp "$nanopb_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
 
           cat > artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig/criterion.pc <<'EOF'
           prefix=/opt/criterion-fil
