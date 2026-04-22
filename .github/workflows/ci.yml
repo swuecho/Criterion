@@ -146,82 +146,67 @@ jobs:
           . $python_test_venv_activate
           meson compile -C build criterion
 
-      - name: "Install"
+      - name: "Create Fil-C source bundle"
         run: |
-          rm -rf artifacts/criterion-fil
-          mkdir -p artifacts/criterion-fil/opt/criterion-fil/include
-          mkdir -p artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig
+          rm -rf artifacts/criterion-fil-source
+          mkdir -p artifacts/criterion-fil-source
 
-          boxfort_lib="$(find build -type f \( -name 'libboxfort*.a' -o -name '*boxfort*.a' \) | head -n1)"
-          nanomsg_lib="$(find build -type f -name 'libnanomsg*.a' | head -n1)"
-          nanopb_lib="$(find build -type f \( -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' -o -name 'libnanopb*.a' \) | head -n1)"
+          tar \
+            --exclude='./.git' \
+            --exclude='./build' \
+            --exclude='./artifacts' \
+            --exclude='./.venv' \
+            -czf artifacts/criterion-fil-source/criterion-fil-source.tar.gz \
+            .
 
-          cp -R include/criterion artifacts/criterion-fil/opt/criterion-fil/include/
-          rm -f artifacts/criterion-fil/opt/criterion-fil/lib/libcriterion.a
-          {
-            printf 'CREATE %s\n' "artifacts/criterion-fil/opt/criterion-fil/lib/libcriterion.a"
-            printf 'ADDLIB %s\n' "build/src/libcriterion.a"
-            if [ -n "$boxfort_lib" ]; then
-              printf 'ADDLIB %s\n' "$boxfort_lib"
-            fi
-            if [ -n "$nanomsg_lib" ]; then
-              printf 'ADDLIB %s\n' "$nanomsg_lib"
-            fi
-            if [ -n "$nanopb_lib" ]; then
-              printf 'ADDLIB %s\n' "$nanopb_lib"
-            fi
-            printf 'SAVE\n'
-            printf 'END\n'
-          } | ar -M
-          ranlib artifacts/criterion-fil/opt/criterion-fil/lib/libcriterion.a
+          cat > artifacts/criterion-fil-source/README.txt <<'EOF'
+          Criterion Fil-C source bundle
 
-          private_libs="-lm -lrt -lpthread"
-          if [ -n "$boxfort_lib" ]; then
-            :
-          fi
-          if [ -n "$nanomsg_lib" ]; then
-            :
-          fi
-          if [ -n "$nanopb_lib" ]; then
-            :
-          fi
+          This bundle is intended to be built from source with Fil-C in the consuming
+          project's CI job or build environment. It is not a standalone prebuilt SDK.
 
-          cat > artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig/criterion.pc <<EOF
-          prefix=\${pcfiledir}/../..
-          exec_prefix=\${prefix}
-          libdir=\${exec_prefix}/lib
-          includedir=\${prefix}/include
+          Supported target:
+          - Linux x86-64 with /opt/fil
 
-          Name: criterion
-          Description: Criterion unit testing framework for C/C++
-          Version: 2.4.3-fil
-          Cflags: -I\${includedir}
-          Libs: -L\${libdir} -lcriterion
-          Libs.private: ${private_libs}
+          Preferred installation path:
+
+            ./ci/install-fil-criterion-from-source.sh <criterion-source-dir> <install-prefix>
+
+          Example:
+
+            ./ci/install-fil-criterion-from-source.sh "$PWD" "$PWD/out"
+
+          Equivalent manual configure/build commands:
+
+            CC=/opt/fil/bin/filcc \
+            CXX=/opt/fil/bin/fil++ \
+            meson setup build \
+              --force-fallback-for=nanomsg,libgit2 \
+              -Dtheories=disabled \
+              -Ddiffs=disabled \
+              -Dshared-library=false \
+              -Dtests=false \
+              -Dsamples=false
+
+            meson compile -C build criterion
+
+          The helper script installs:
+          - headers into <install-prefix>/include
+          - libcriterion.a into <install-prefix>/lib
+          - criterion.pc into <install-prefix>/lib/pkgconfig
+
+          Then build your downstream tests with:
+
+            export PKG_CONFIG_PATH="<install-prefix>/lib/pkgconfig"
+            /opt/fil/bin/filcc your-tests.c \
+              $(pkg-config --cflags --libs --static criterion)
           EOF
-
-      - name: "Smoke test artifact"
-        env:
-          CC: /opt/fil/bin/filcc
-          CRITERION_PKGCONFIG: ${{ github.workspace }}/artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig
-        run: |
-          cat > smoke-criterion.c <<'EOF'
-          #include <criterion/criterion.h>
-
-          Test(smoke, links) {
-          }
-          EOF
-
-          PKG_CONFIG_PATH="$CRITERION_PKGCONFIG" \
-            "$CC" smoke-criterion.c \
-            $(PKG_CONFIG_PATH="$CRITERION_PKGCONFIG" pkg-config --cflags --libs --static criterion) \
-            -o smoke-criterion.bin
 
       - name: Upload Fil-C artifact
         uses: actions/upload-artifact@v4
         with:
-          name: criterion-fil-linux-x86_64
-          path: artifacts/criterion-fil/opt/criterion-fil
+          name: criterion-fil-source-linux-x86_64
+          path: artifacts/criterion-fil-source
           if-no-files-found: error
 
   binaries:
