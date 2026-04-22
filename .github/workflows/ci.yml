@@ -146,6 +146,29 @@ jobs:
           . $python_test_venv_activate
           meson compile -C build criterion
 
+      - name: "Smoke test subproject consumer"
+        env:
+          CC: /opt/fil/bin/filcc
+          CXX: /opt/fil/bin/fil++
+        run: |
+          rm -rf /tmp/criterion-filc-consumer
+          mkdir -p /tmp/criterion-filc-consumer/subprojects/criterion
+
+          cp ci/filc-consumer/meson.build /tmp/criterion-filc-consumer/
+          cp ci/filc-consumer/sample_tests.c /tmp/criterion-filc-consumer/
+
+          tar \
+            --exclude='./.git' \
+            --exclude='./build' \
+            --exclude='./artifacts' \
+            --exclude='./.venv' \
+            -cf - . \
+            | tar -C /tmp/criterion-filc-consumer/subprojects/criterion -xf -
+
+          . $python_test_venv_activate
+          CC="$CC" CXX="$CXX" meson setup /tmp/criterion-filc-consumer/build /tmp/criterion-filc-consumer
+          CC="$CC" CXX="$CXX" meson test -C /tmp/criterion-filc-consumer/build --print-errorlogs
+
       - name: "Create Fil-C source bundle"
         run: |
           rm -rf artifacts/criterion-fil-source
@@ -167,6 +190,10 @@ jobs:
 
           Supported target:
           - Linux x86-64 with /opt/fil
+
+          End-to-end example:
+          - see ci/filc-consumer for a minimal Meson consumer project that builds
+            Criterion as a subproject with Fil-C
 
           Preferred installation path:
 
