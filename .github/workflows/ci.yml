@@ -211,7 +211,9 @@ jobs:
           meson setup build \
             --force-fallback-for=nanomsg,libgit2 \
             -Dtheories=disabled \
-            -Dshared-library=false
+            -Dshared-library=false \
+            -Dtests=false \
+            -Dsamples=false
 
       - name: "Build"
         env:
@@ -219,7 +221,7 @@ jobs:
           CXX: /opt/fil/bin/fil++
         run: |
           . $python_test_venv_activate
-          meson compile -C build
+          meson compile -C build criterion
 
   binaries:
     name: "Binaries"
