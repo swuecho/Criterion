@@ -187,7 +187,7 @@ jobs:
           fi
 
           cat > artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig/criterion.pc <<EOF
-          prefix=/opt/criterion-fil
+          prefix=\${pcfiledir}/../..
           exec_prefix=\${prefix}
           libdir=\${exec_prefix}/lib
           includedir=\${prefix}/include
