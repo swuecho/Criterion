@@ -167,7 +167,7 @@ jobs:
           sudo apt-get update
           sudo DEBIAN_FRONTEND=noninteractive apt-get install --yes \
             pkgconf meson cmake git python3-pip python3-venv \
-            libgit2-dev libffi-dev libnanomsg-dev \
+            libgit2-dev libffi-dev \
             curl jq xz-utils
 
       - name: Checkout Criterion
@@ -208,7 +208,7 @@ jobs:
           CXX: ${{ github.workspace }}/.filc/build/bin/clang++
         run: |
           . $python_test_venv_activate
-          meson setup build
+          meson setup build --force-fallback-for=nanomsg
 
       - name: "Build"
         env:
