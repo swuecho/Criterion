@@ -59,6 +59,7 @@ if get_option('filc-simple')
 	sources -= files(
 		'core/abort.c',
 		'core/runner.c',
+		'core/runner_coroutine.c',
 		'core/test.c',
 		'io/event.c',
 	)

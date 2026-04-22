@@ -225,7 +225,7 @@ if ((not libgit2.found() and get_option('diffs').enabled())
 	libgit2 = libgit2_proj.dependency('git2')
 endif
 
-boxfort = dependency('boxfort', required: not get_option('filc-simple'),
+boxfort = dependency('boxfort',
 					fallback: ['boxfort', 'boxfort'],
 					default_options: ['default_library=static', 'samples=false', 'tests=false'])
 libffi = dependency('libffi', required: get_option('theories'), fallback: ['libffi', 'ffi_dep'],
@@ -253,13 +253,12 @@ deps += [
 	debugbreak,
 	klib,
 	threads,
+	boxfort,
+	nanomsg,
+	nanopb,
 	librt,
 	libm,
 ]
-
-if not get_option('filc-simple')
-	deps += boxfort
-endif
 
 if get_option('theories').enabled()
 	deps += libffi
@@ -267,13 +266,6 @@ endif
 
 if get_option('diffs').enabled()
 	deps += libgit2
-endif
-
-if not get_option('filc-simple')
-	deps += [
-		nanomsg,
-		nanopb,
-	]
 endif
 
 meson.add_dist_script('.dist-filter.sh')

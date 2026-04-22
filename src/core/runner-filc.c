@@ -5,6 +5,7 @@
 #include "criterion/internal/preprocess.h"
 #include "criterion/options.h"
 #include "criterion/criterion.h"
+#include "csptr/smalloc.h"
 #include "filc-simple.h"
 #include "runner.h"
 #include "common.h"
