@@ -37,7 +37,7 @@ meson setup "$build_dir" "$criterion_src" \
 
 CC=/opt/fil/bin/filcc \
 CXX=/opt/fil/bin/fil++ \
-meson compile -C "$build_dir" criterion
+meson compile -C "$build_dir"
 
 # Meson install can still be too broad in some environments. Install only the
 # pieces the downstream project needs to compile and link tests.
