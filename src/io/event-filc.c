@@ -14,8 +14,8 @@ void criterion_send_assert(struct criterion_assert_stats *stats)
 
     cri_filc_mark_failed();
     if (stats->message && *stats->message) {
-        fprintf(stderr, "%s:%zu: %s\n", stats->file, stats->line, stats->message);
+        fprintf(stderr, "%s:%u: %s\n", stats->file, stats->line, stats->message);
     } else {
-        fprintf(stderr, "%s:%zu: assertion failed\n", stats->file, stats->line);
+        fprintf(stderr, "%s:%u: assertion failed\n", stats->file, stats->line);
     }
 }

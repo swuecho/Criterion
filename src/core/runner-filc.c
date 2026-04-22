@@ -9,6 +9,7 @@
 #include "filc-simple.h"
 #include "runner.h"
 #include "common.h"
+#include "string/extglobmatch.h"
 
 extern const struct criterion_test *criterion_current_test;
 extern const struct criterion_suite *criterion_current_suite;
