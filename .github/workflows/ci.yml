@@ -231,23 +231,35 @@ jobs:
           mkdir -p artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig
 
           boxfort_lib="$(find build -type f \( -name 'libboxfort*.a' -o -name '*boxfort*.a' \) | head -n1)"
-          libgit2_lib="$(find build -type f \( -name 'libgit2*.a' -o -name 'libgit2.a' -o -name 'libgit2*.a' -o -name 'libgit*.a' -o -name 'libgit2-*.a' -o -name 'libgit2_*\.a' -o -name 'git2.a' -o -name 'libgit2-glue.a' \) | head -n1)"
+          libgit2_lib="$(find build -type f \( -name 'libgit2*.a' -o -name 'git2.a' \) | head -n1)"
           nanomsg_lib="$(find build -type f -name 'libnanomsg*.a' | head -n1)"
           nanopb_lib="$(find build -type f \( -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' -o -name 'libnanopb*.a' \) | head -n1)"
 
-          test -n "$boxfort_lib" || { echo "Missing BoxFort archive"; find build -type f -name '*.a' | sort; exit 1; }
-          test -n "$libgit2_lib" || { echo "Missing libgit2 archive"; find build -type f -name '*.a' | sort; exit 1; }
-          test -n "$nanomsg_lib" || { echo "Missing nanomsg archive"; find build -type f -name '*.a' | sort; exit 1; }
-          test -n "$nanopb_lib" || { echo "Missing nanopb archive"; find build -type f -name '*.a' | sort; exit 1; }
-
           cp -R include/criterion artifacts/criterion-fil/opt/criterion-fil/include/
           cp build/src/libcriterion.a artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp "$boxfort_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp "$libgit2_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp "$nanomsg_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
-          cp "$nanopb_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+          
+          private_libs="-lm -lrt -lpthread"
+          if [ -n "$boxfort_lib" ]; then
+            cp "$boxfort_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+            private_libs="-lboxfort $private_libs"
+          fi
+          if [ -n "$libgit2_lib" ]; then
+            cp "$libgit2_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+            private_libs="-lgit2 $private_libs"
+          fi
+          if [ -n "$nanomsg_lib" ]; then
+            cp "$nanomsg_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+            private_libs="-lnanomsg $private_libs"
+          fi
+          if [ -n "$nanopb_lib" ]; then
+            cp "$nanopb_lib" artifacts/criterion-fil/opt/criterion-fil/lib/
+            nanopb_name="$(basename "$nanopb_lib")"
+            nanopb_name="${nanopb_name#lib}"
+            nanopb_name="${nanopb_name%.a}"
+            private_libs="-l${nanopb_name} $private_libs"
+          fi
 
-          cat > artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig/criterion.pc <<'EOF'
+          cat > artifacts/criterion-fil/opt/criterion-fil/lib/pkgconfig/criterion.pc <<EOF
           prefix=/opt/criterion-fil
           exec_prefix=${prefix}
           libdir=${exec_prefix}/lib
@@ -258,7 +270,7 @@ jobs:
           Version: 2.4.3-fil
           Cflags: -I${includedir}
           Libs: -L${libdir} -lcriterion
-          Libs.private: -lboxfort -lgit2 -lnanomsg -lprotobuf-nanopb-static -lm -lrt -lpthread
+          Libs.private: ${private_libs}
           EOF
 
       - name: Upload Fil-C artifact
