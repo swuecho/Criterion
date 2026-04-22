@@ -210,7 +210,8 @@ jobs:
           . $python_test_venv_activate
           meson setup build \
             --force-fallback-for=nanomsg,libgit2 \
-            -Dtheories=disabled
+            -Dtheories=disabled \
+            -Dshared-library=false
 
       - name: "Build"
         env:
