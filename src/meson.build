@@ -126,10 +126,16 @@ else
 	criterion_shared_link = libcriterion
 endif
 
+criterion_compile_args = []
+if get_option('filc-simple')
+	criterion_compile_args += ['-DCRITERION_FILC_SIMPLE=1']
+endif
+
 criterion = declare_dependency(
 	include_directories: [criterion_api],
 	dependencies: deps,
-	link_with: [libcriterion])
+	link_with: [libcriterion],
+	compile_args: criterion_compile_args)
 
 pkgconfig_rpath = ''
 if get_option('rpath-in-pkgconfig').enabled() or (get_option('rpath-in-pkgconfig').auto() and prefix.startswith('/home/'))

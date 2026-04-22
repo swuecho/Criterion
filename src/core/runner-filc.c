@@ -11,11 +11,9 @@
 #include "common.h"
 #include "string/extglobmatch.h"
 
-extern const struct criterion_test *criterion_current_test;
-extern const struct criterion_suite *criterion_current_suite;
-
 CR_API const struct criterion_test *criterion_current_test;
 CR_API const struct criterion_suite *criterion_current_suite;
+int cri_is_runner = 1;
 
 static int cmp_suite(void *a, void *b)
 {
@@ -138,6 +136,8 @@ static int criterion_run_all_tests_impl(struct criterion_test_set *set)
 
 CR_API int criterion_run_all_tests(struct criterion_test_set *set)
 {
+    cri_is_runner = 1;
+
     if (criterion_options.pattern)
         disable_unmatching(set);
 

@@ -5,6 +5,10 @@
 extern const struct criterion_test *criterion_current_test;
 extern const struct criterion_suite *criterion_current_suite;
 
+void cri_asserts_passed_incr(void)
+{
+}
+
 void criterion_internal_run_test(void (*fn)(void))
 {
     const struct criterion_suite *suite = criterion_current_suite;
