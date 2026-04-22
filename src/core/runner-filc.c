@@ -8,6 +8,7 @@
 #include "criterion/criterion.h"
 #include "criterion/stats.h"
 #include "compat/section.h"
+#include "report.h"
 #include "csptr/smalloc.h"
 #include "filc-simple.h"
 #include "runner.h"
