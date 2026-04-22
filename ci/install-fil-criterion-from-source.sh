@@ -37,11 +37,7 @@ meson setup "$build_dir" "$criterion_src" \
 
 CC=/opt/fil/bin/filcc \
 CXX=/opt/fil/bin/fil++ \
-meson compile -C "$build_dir" \
-  src/libcriterion.a \
-  subprojects/boxfort/src/libboxfort.a \
-  subprojects/nanomsg/libnanomsg.a \
-  subprojects/nanopb/libprotobuf_nanopb_static.a
+meson compile -C "$build_dir"
 
 # Meson install can still be too broad in some environments. Install only the
 # pieces the downstream project needs to compile and link tests.
@@ -49,11 +45,23 @@ mkdir -p "$install_prefix/include"
 mkdir -p "$install_prefix/lib/pkgconfig"
 
 cp -R "$criterion_src/include/criterion" "$install_prefix/include/"
-cp "$build_dir/src/libcriterion.a" "$install_prefix/lib/"
+
+criterion_lib="$build_dir/src/libcriterion.a"
+if [ ! -f "$criterion_lib" ]; then
+  criterion_lib="$(find "$build_dir" -type f -name 'libcriterion.a' | head -n1)"
+fi
+if [ -z "${criterion_lib:-}" ] || [ ! -f "$criterion_lib" ]; then
+  criterion_lib="$(find "$build_dir" -type f -name 'libcriterion*.a' | head -n1)"
+fi
 
 boxfort_lib="$(find "$build_dir" -type f -name 'libboxfort*.a' | head -n1)"
 nanomsg_lib="$(find "$build_dir" -type f -name 'libnanomsg*.a' | head -n1)"
 nanopb_lib="$(find "$build_dir" -type f \( -name 'libprotobuf_nanopb_static.a' -o -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' \) | head -n1)"
+
+if [ -z "${criterion_lib:-}" ] || [ ! -f "$criterion_lib" ]; then
+  echo "Missing Criterion archive" >&2
+  exit 1
+fi
 
 if [ -z "$boxfort_lib" ] || [ ! -f "$boxfort_lib" ]; then
   echo "Missing BoxFort archive" >&2
@@ -70,6 +78,7 @@ if [ -z "$nanopb_lib" ] || [ ! -f "$nanopb_lib" ]; then
   exit 1
 fi
 
+cp "$criterion_lib" "$install_prefix/lib/"
 cp "$boxfort_lib" "$install_prefix/lib/"
 cp "$nanomsg_lib" "$install_prefix/lib/"
 cp "$nanopb_lib" "$install_prefix/lib/"
