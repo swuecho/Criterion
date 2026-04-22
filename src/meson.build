@@ -15,16 +15,11 @@ sources = files(
 	'compat/section.c',
 	'compat/strtok.c',
 	'compat/time.c',
-
-	'core/abort.c',
 	'core/assert.c',
 	'core/client.c',
 	'core/ordered-set.c',
 	'core/report.c',
-	'core/runner.c',
-	'core/runner_coroutine.c',
 	'core/stats.c',
-	'core/test.c',
 
 	'csptr/array.c',
 	'csptr/mman.c',
@@ -32,8 +27,6 @@ sources = files(
 	'entry/entry.c',
 	'entry/options.c',
 	'entry/params.c',
-
-	'io/event.c',
 	'io/file.c',
 	'io/json.c',
 	'io/output.c',
@@ -56,19 +49,19 @@ sources = files(
 )
 
 if get_option('filc-simple')
-	sources -= files(
+	sources = sources + files(
+		'core/abort-filc.c',
+		'core/runner-filc.c',
+		'core/test-filc.c',
+		'io/event-filc.c',
+	)
+else
+	sources += files(
 		'core/abort.c',
 		'core/runner.c',
 		'core/runner_coroutine.c',
 		'core/test.c',
 		'io/event.c',
-	)
-
-	sources += files(
-		'core/abort-filc.c',
-		'core/runner-filc.c',
-		'core/test-filc.c',
-		'io/event-filc.c',
 	)
 endif
 
