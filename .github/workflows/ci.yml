@@ -227,7 +227,7 @@ jobs:
       - name: "Install"
         run: |
           rm -rf artifacts/criterion-fil
-          meson install -C build --destdir "$(pwd)/artifacts/criterion-fil"
+          meson install -C build --no-rebuild --destdir "$(pwd)/artifacts/criterion-fil"
 
       - name: Upload Fil-C artifact
         uses: actions/upload-artifact@v4
