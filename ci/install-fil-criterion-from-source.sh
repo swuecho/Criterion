@@ -47,6 +47,29 @@ mkdir -p "$install_prefix/lib/pkgconfig"
 cp -R "$criterion_src/include/criterion" "$install_prefix/include/"
 cp "$build_dir/src/libcriterion.a" "$install_prefix/lib/"
 
+boxfort_lib="$(find "$build_dir" -type f -name 'libboxfort*.a' | head -n1)"
+nanomsg_lib="$(find "$build_dir" -type f -name 'libnanomsg*.a' | head -n1)"
+nanopb_lib="$(find "$build_dir" -type f \( -name 'libprotobuf_nanopb_static.a' -o -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' \) | head -n1)"
+
+if [ -z "$boxfort_lib" ] || [ ! -f "$boxfort_lib" ]; then
+  echo "Missing BoxFort archive" >&2
+  exit 1
+fi
+
+if [ -z "$nanomsg_lib" ] || [ ! -f "$nanomsg_lib" ]; then
+  echo "Missing nanomsg archive" >&2
+  exit 1
+fi
+
+if [ -z "$nanopb_lib" ] || [ ! -f "$nanopb_lib" ]; then
+  echo "Missing nanopb archive" >&2
+  exit 1
+fi
+
+cp "$boxfort_lib" "$install_prefix/lib/"
+cp "$nanomsg_lib" "$install_prefix/lib/"
+cp "$nanopb_lib" "$install_prefix/lib/"
+
 cat > "$install_prefix/lib/pkgconfig/criterion.pc" <<EOF
 prefix=$install_prefix
 exec_prefix=\${prefix}
@@ -55,10 +78,10 @@ includedir=\${prefix}/include
 
 Name: criterion
 Description: Criterion unit testing framework for C/C++
-Version: 2.4.3-fil-source
-Cflags: -I\${includedir}
+Version: 2.4.3-fil-sdk
+Cflags: -I\${includedir} -DCRITERION_FILC_SIMPLE=1
 Libs: -L\${libdir} -lcriterion
-Libs.private: -lm -lrt -lpthread
+Libs.private: -lboxfort -lnanomsg -lprotobuf_nanopb_static -lm -lrt -lpthread -lanl
 EOF
 
 echo "installed Fil-C Criterion source build to $install_prefix"
