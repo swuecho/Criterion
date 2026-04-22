@@ -233,7 +233,7 @@ jobs:
           boxfort_lib="$(find build -type f -name 'libboxfort*.a' | head -n1)"
           libgit2_lib="$(find build -type f -name 'libgit2*.a' | head -n1)"
           nanomsg_lib="$(find build -type f -name 'libnanomsg*.a' | head -n1)"
-          nanopb_lib="$(find build -type f \\( -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' \\) | head -n1)"
+          nanopb_lib="$(find build -type f \( -name 'libprotobuf-nanopb-static.a' -o -name 'libprotobuf*.a' \) | head -n1)"
 
           test -n "$boxfort_lib"
           test -n "$libgit2_lib"
