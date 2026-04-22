@@ -8,6 +8,7 @@ criterion_proj = subproject('criterion', default_options: [
   'shared-library=false',
   'tests=false',
   'samples=false',
+  'filc-simple=true',
 ])
 
 criterion_dep = criterion_proj.get_variable('criterion')

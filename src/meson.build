@@ -55,6 +55,22 @@ sources = files(
 	'string/xxd.c',
 )
 
+if get_option('filc-simple')
+	sources -= files(
+		'core/abort.c',
+		'core/runner.c',
+		'core/test.c',
+		'io/event.c',
+	)
+
+	sources += files(
+		'core/abort-filc.c',
+		'core/runner-filc.c',
+		'core/test-filc.c',
+		'io/event-filc.c',
+	)
+endif
+
 if must_regenerate_pb
 	protoc = find_program('protoc')
 	protoc_gen_nanopb = find_program('protoc-gen-nanopb')

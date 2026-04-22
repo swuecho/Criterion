@@ -29,6 +29,7 @@ meson setup "$build_dir" "$criterion_src" \
   --force-fallback-for=nanomsg,libgit2 \
   -Dtheories=disabled \
   -Ddiffs=disabled \
+  -Dfilc-simple=true \
   -Dshared-library=false \
   -Dtests=false \
   -Dsamples=false \
