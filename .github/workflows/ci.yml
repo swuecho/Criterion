@@ -208,7 +208,9 @@ jobs:
           CXX: ${{ github.workspace }}/.filc/build/bin/clang++
         run: |
           . $python_test_venv_activate
-          meson setup build --force-fallback-for=nanomsg,libgit2,libffi
+          meson setup build \
+            --force-fallback-for=nanomsg,libgit2 \
+            -Dtheories=disabled
 
       - name: "Build"
         env:
