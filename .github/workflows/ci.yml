@@ -213,7 +213,8 @@ jobs:
             -Dtheories=disabled \
             -Dshared-library=false \
             -Dtests=false \
-            -Dsamples=false
+            -Dsamples=false \
+            --prefix=/opt/criterion-fil
 
       - name: "Build"
         env:
@@ -222,6 +223,18 @@ jobs:
         run: |
           . $python_test_venv_activate
           meson compile -C build criterion
+
+      - name: "Install"
+        run: |
+          rm -rf artifacts/criterion-fil
+          meson install -C build --destdir "$(pwd)/artifacts/criterion-fil"
+
+      - name: Upload Fil-C artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: criterion-fil-linux-x86_64
+          path: artifacts/criterion-fil/opt/criterion-fil
+          if-no-files-found: error
 
   binaries:
     name: "Binaries"
