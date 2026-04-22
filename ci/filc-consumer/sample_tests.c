@@ -1,5 +1,5 @@
 #include <criterion/criterion.h>
 
 Test(consumer, smoke) {
-    cr_assert(eq(int, 2 + 2, 4));
+    cr_assert(2 + 2 == 4);
 }
