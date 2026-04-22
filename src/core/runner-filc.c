@@ -9,6 +9,7 @@
 #include "criterion/stats.h"
 #include "report.h"
 #include "csptr/smalloc.h"
+#include "err.h"
 #include "filc-simple.h"
 #include "runner.h"
 #include "common.h"
