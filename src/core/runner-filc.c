@@ -7,7 +7,6 @@
 #include "criterion/options.h"
 #include "criterion/criterion.h"
 #include "criterion/stats.h"
-#include "compat/section.h"
 #include "report.h"
 #include "csptr/smalloc.h"
 #include "filc-simple.h"
@@ -18,6 +17,29 @@
 CR_API const struct criterion_test *criterion_current_test;
 CR_API const struct criterion_suite *criterion_current_suite;
 int cri_is_runner = 1;
+
+struct filc_test_node {
+    struct criterion_test *test;
+    struct filc_test_node *next;
+};
+
+static struct filc_test_node *g_filc_tests_head;
+static struct filc_test_node *g_filc_tests_tail;
+
+CR_API void criterion_internal_filc_register_test(struct criterion_test *test)
+{
+    struct filc_test_node *n = malloc(sizeof (*n));
+    if (!n)
+        cr_panic("Could not allocate filc test node");
+    n->test = test;
+    n->next = NULL;
+
+    if (g_filc_tests_tail)
+        g_filc_tests_tail->next = n;
+    else
+        g_filc_tests_head = n;
+    g_filc_tests_tail = n;
+}
 
 static int filc_should_print(enum criterion_logging_level level)
 {
@@ -79,24 +101,13 @@ struct criterion_test_set *criterion_init(void)
         .tests = 0,
     };
 
-    struct cri_section *sections = NULL;
-    if (!cri_sections_getaddr("cr_tst", &sections)) {
-        for (struct cri_section *s = sections; s->addr; ++s) {
-            void *start = s->addr;
-            void *end = (char *) start + s->length;
-
-            FOREACH_TEST_SEC(test, start, end) {
-                if (!*test)
-                    continue;
-
-                if (!*(*test)->category || !*(*test)->name)
-                    continue;
-
-                criterion_register_test(set, *test);
-            }
-        }
+    for (struct filc_test_node *n = g_filc_tests_head; n; n = n->next) {
+        if (!n->test || !n->test->category || !n->test->name)
+            continue;
+        if (!*n->test->category || !*n->test->name)
+            continue;
+        criterion_register_test(set, n->test);
     }
-    free(sections);
 
     if (set->tests != 0)
         return set;
