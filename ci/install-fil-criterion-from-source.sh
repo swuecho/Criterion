@@ -37,7 +37,11 @@ meson setup "$build_dir" "$criterion_src" \
 
 CC=/opt/fil/bin/filcc \
 CXX=/opt/fil/bin/fil++ \
-meson compile -C "$build_dir"
+meson compile -C "$build_dir" \
+  src/libcriterion.a \
+  subprojects/boxfort/src/libboxfort.a \
+  subprojects/nanomsg/libnanomsg.a \
+  subprojects/nanopb/libprotobuf_nanopb_static.a
 
 # Meson install can still be too broad in some environments. Install only the
 # pieces the downstream project needs to compile and link tests.
