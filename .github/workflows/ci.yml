@@ -179,21 +179,21 @@ jobs:
             https://api.github.com/repos/pizlonator/fil-c/releases/latest)"
           asset_url="$(printf '%s' "$release_json" | jq -r '
             .assets[]
-            | select(.name | test("^filc-.*-linux-x86_64\\.tar\\.xz$"))
+            | select(.name | test("^optfil-.*-linux-x86_64\\.tar\\.xz$"))
             | .browser_download_url
           ' | head -n1)"
 
           if [ -z "$asset_url" ] || [ "$asset_url" = "null" ]; then
-            echo "Unable to find a Linux x86_64 Fil-C asset in the latest release." >&2
+            echo "Unable to find a Linux x86_64 /opt/fil asset in the latest release." >&2
             exit 1
           fi
 
           mkdir -p .filc
-          curl --fail --location --silent --show-error "$asset_url" --output .filc/filc.tar.xz
-          tar -xJf .filc/filc.tar.xz -C .filc --strip-components=1
+          curl --fail --location --silent --show-error "$asset_url" --output .filc/optfil.tar.xz
+          tar -xJf .filc/optfil.tar.xz -C .filc --strip-components=1
           (
             cd .filc
-            ./setup.sh
+            printf 'YES\n' | sudo ./setup.sh
           )
 
       - name: "Setup Python test venv"
@@ -204,8 +204,8 @@ jobs:
 
       - name: "Setup"
         env:
-          CC: ${{ github.workspace }}/.filc/build/bin/clang
-          CXX: ${{ github.workspace }}/.filc/build/bin/clang++
+          CC: /opt/fil/bin/filcc
+          CXX: /opt/fil/bin/fil++
         run: |
           . $python_test_venv_activate
           meson setup build \
@@ -214,8 +214,8 @@ jobs:
 
       - name: "Build"
         env:
-          CC: ${{ github.workspace }}/.filc/build/bin/clang
-          CXX: ${{ github.workspace }}/.filc/build/bin/clang++
+          CC: /opt/fil/bin/filcc
+          CXX: /opt/fil/bin/fil++
         run: |
           . $python_test_venv_activate
           meson compile -C build
