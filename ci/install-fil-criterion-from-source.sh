@@ -24,6 +24,15 @@ build_dir="$criterion_src/build-fil"
 
 rm -rf "$build_dir"
 
+extra_meson_args=()
+if [ "$shared_library" = "true" ]; then
+  # Fil-C may not provide some optional ELF/linker-introspection symbols (e.g.
+  # dl_iterate_phdr) in all distributions/slices. Static archives can tolerate
+  # this because the final executable only pulls required objects, but shared
+  # libraries link everything and (by default) use -Wl,--no-undefined.
+  extra_meson_args+=(-Db_lundef=false)
+fi
+
 CC=/opt/fil/bin/filcc \
 CXX=/opt/fil/bin/fil++ \
 meson setup "$build_dir" "$criterion_src" \
@@ -34,6 +43,7 @@ meson setup "$build_dir" "$criterion_src" \
   -Dshared-library="$shared_library" \
   -Dtests=false \
   -Dsamples=false \
+  "${extra_meson_args[@]}" \
   --prefix="$install_prefix"
 
 CC=/opt/fil/bin/filcc \
