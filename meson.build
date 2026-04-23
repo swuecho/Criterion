@@ -253,12 +253,15 @@ deps += [
 	debugbreak,
 	klib,
 	threads,
-	boxfort,
 	nanomsg,
 	nanopb,
 	librt,
 	libm,
 ]
+
+if not (get_option('filc-simple') and get_option('shared-library'))
+	deps += boxfort
+endif
 
 if get_option('theories').enabled()
 	deps += libffi
