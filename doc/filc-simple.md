@@ -5,8 +5,70 @@ This repo supports building Criterion with the Fil-C toolchain using Meson optio
 Fil-C simple mode exists because the full Criterion runner (workers, protocol, output processing) is not currently compatible with Fil-C for this project, but we still want:
 
 - A working `libcriterion.a` usable by downstream Fil-C builds
+- A working `libcriterion.so` usable by downstream Fil-C builds
 - A test runner that can execute tests in-process
 - Some human-readable output while tests run
+
+## Building and linking (static and shared)
+
+The Fil-C SDK build script supports producing both the static and shared libraries in one go by setting:
+
+```sh
+export CRITERION_FILC_SHARED_LIBRARY=true
+```
+
+This corresponds to Meson option `-Dshared-library=true`, which makes Criterion build *both* `libcriterion.a` and `libcriterion.so`.
+
+### Dynamic linking
+
+When linking dynamically, you typically need to set `LD_LIBRARY_PATH` to find `libcriterion.so` at runtime:
+
+```sh
+export PKG_CONFIG_PATH="$CRITERION_PREFIX/lib/pkgconfig"
+export LD_LIBRARY_PATH="$CRITERION_PREFIX/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+/opt/fil/bin/filcc your-tests.c -o your-tests \
+  $(pkg-config --cflags --libs criterion)
+
+./your-tests
+```
+
+### Static linking
+
+To link statically, use `pkg-config --static`:
+
+```sh
+export PKG_CONFIG_PATH="$CRITERION_PREFIX/lib/pkgconfig"
+
+/opt/fil/bin/filcc your-tests.c -o your-tests \
+  $(pkg-config --cflags --libs --static criterion)
+
+./your-tests
+```
+
+## Static vs shared: pros and cons
+
+### Shared (`libcriterion.so`)
+
+- **Pros**
+  - Smaller test executables (code lives in the shared library).
+  - Potentially faster edit/rebuild loops if only the library changes.
+  - One in-memory copy of the library can be shared across processes (depending on runtime behavior).
+- **Cons**
+  - Requires runtime loader setup: you must ensure `libcriterion.so` is discoverable (for example via `LD_LIBRARY_PATH` or rpath).
+  - More moving parts to ship: the `.so` and any runtime dependencies must be present and discoverable.
+  - More sensitive to environment differences (loader search paths).
+
+### Static (`libcriterion.a`)
+
+- **Pros**
+  - Self-contained executables: no need to find `libcriterion.so` at runtime.
+  - Often simplest for CI artifacts and “just run it” scenarios.
+  - Avoids accidentally loading the wrong shared library at runtime.
+- **Cons**
+  - Larger executables and longer link times.
+  - If you have many test binaries, the library code is duplicated in each one.
+  - Updating Criterion requires relinking consumers.
 
 ## Why `pizlonated_dl_iterate_phdr` can be “missing”
 
