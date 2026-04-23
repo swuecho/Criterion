@@ -53,7 +53,7 @@ if filc_shared_minimal
 	# Fil-C shared builds may not be able to resolve some ELF/linker-introspection
 	# APIs (e.g. dl_iterate_phdr) or BoxFort trampoline symbols in all slices.
 	# Keep the shared library linkable by omitting those features.
-	sources -= files(
+	sources = sources - files(
 		'compat/section.c',
 		'core/report.c',
 		'io/redirect.c',
